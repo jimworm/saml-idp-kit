@@ -6,5 +6,9 @@ module SamlIdpKit
       yield(self)
       self.freeze
     end
+    
+    def algorithm=(name)
+      @algorithm = ::OpenSSL::Digest.const_get(name.to_s.upcase, false)
+    end
   end
 end

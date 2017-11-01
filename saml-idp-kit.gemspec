@@ -1,4 +1,4 @@
-require_relative 'lib/saml_idp_kit'
+require_relative 'lib/saml-idp-kit'
 
 Gem::Specification.new do |s|
   s.name          = 'saml-idp-kit'
@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.homepage      = 'https://github.com/jimworm/saml-idp-kit'
   s.summary       = 'SAML IdP tools'
   s.description   = 'SAML tools to decode requests and encode assertions, for use as an identity provider'
-  s.date          = '2017-10-19'
+  s.date          = '2017-11-01'
   s.files         = Dir.glob("lib/**/*") + ["MIT-LICENSE",
                                             "README.md",
                                             "Gemfile",

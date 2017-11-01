@@ -94,6 +94,23 @@ module SamlIdpKit
       Base64.encode64(saml_response.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::AS_XML))
     end
     
+    def form_html(target:, response:)
+      <<-EOS
+      <!DOCTYPE html>
+      <html>
+      <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      </head>
+      <body onload="document.forms[0].submit();" style="visibility:hidden;">
+      <form method="post" action="#{target}">
+      <input type="hidden" name="SAMLResponse" id="SAMLResponse" value="#{response}" />
+      <input type="submit" value="Submit" />
+      </form>
+      </body>
+      </html>
+      EOS
+    end
     
     
     private
@@ -132,8 +149,7 @@ module SamlIdpKit
         end
       end
     end
-    
-    
+        
     def sign(data)
       key = OpenSSL::PKey::RSA.new(SamlIdpKit.secret_key)
       Base64.strict_encode64(key.sign(SamlIdpKit.algorithm.new, data))
