@@ -127,7 +127,7 @@ module SamlIdpKit
             end
             Conditions('NotBefore' => (at-5).iso8601, 'NotOnOrAfter' => (at+60*60).iso8601) do
               AudienceRestriction do
-                Audience requester
+                Audience audience_uri
               end
             end
             AttributeStatement do
