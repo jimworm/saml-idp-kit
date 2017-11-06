@@ -20,9 +20,14 @@ module SamlIdpKit
       
       signed_info = Nokogiri::XML::DocumentFragment.parse('').tap do |signed_info|
         digest_value   = Base64.strict_encode64(algorithm.digest(canonicalize(assertion)))
-        algorithm_name = algorithm.to_s.tap do |name|
-          name = name[(name.rindex("::") + 2)..-1].downcase
-        end
+        algorithm_name = begin
+          full_name = algorithm.to_s
+          if i = full_name.rindex("::")
+            full_name[(i + 2)..-1]
+          else
+            full_name
+          end
+        end.downcase
         
         Nokogiri::XML::Builder.with(signed_info) do
           SignedInfo('xmlns:ds' => 'http://www.w3.org/2000/09/xmldsig#') do
@@ -46,7 +51,7 @@ module SamlIdpKit
         Nokogiri::XML::Builder.with(keyinfo) do
           KeyInfo('xmlns' => 'http://www.w3.org/2000/09/xmldsig#') do
             X509Data do
-              X509Certificate certificate
+              X509Certificate certificate.gsub(/\s+/, '')
             end
           end
         end

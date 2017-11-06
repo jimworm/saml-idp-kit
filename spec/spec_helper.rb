@@ -2,7 +2,7 @@
 require 'rspec'
 require 'ruby-saml'
 require 'saml-idp-kit'
-require 'pry'
+# require 'pry'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
 
