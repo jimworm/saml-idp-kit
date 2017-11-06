@@ -15,7 +15,6 @@ module SamlIdpKit
       now = Time.now.utc
       response_id, reference_id = UUID.generate, UUID.generate
       audience_uri = opts[:audience_uri] || decoded_saml_request[:acs_url]
-      idp_name     = opts[:idp_name] || 'https://example.com'
       
       assertion = assert(idp: idp_name, requester: decoded_saml_request[:issuer] , audience_uri: audience_uri, nameid: nameid, at: now, reference_id: reference_id, attributes: opts[:attributes])
       
