@@ -15,8 +15,7 @@ module SamlIdpKit
       now = Time.now.utc
       response_id, reference_id = UUID.generate, UUID.generate
       audience_uri = opts[:audience_uri] || decoded_saml_request[:acs_url]
-      
-      idp_name = 'https://example.com'
+      idp_name     = opts[:idp_name] || 'https://example.com'
       
       assertion = assert(idp: idp_name, requester: decoded_saml_request[:issuer] , audience_uri: audience_uri, nameid: nameid, at: now, reference_id: reference_id, attributes: opts[:attributes])
       
@@ -73,7 +72,7 @@ module SamlIdpKit
       saml_response = Nokogiri::XML::DocumentFragment.parse('').tap do |saml_response|
         Nokogiri::XML::Builder.with(saml_response) do
           Response('ID' => "_#{response_id}", 'Version' => '2.0', 'IssueInstant' => now.iso8601,
-                   # 'Destination' => audience_uri, 'Consent' => 'urn:oasis:names:tc:SAML:2.0:consent:unspecified',
+                   'Destination' => audience_uri, 'Consent' => 'urn:oasis:names:tc:SAML:2.0:consent:unspecified',
                    'InResponseTo' => decoded_saml_request[:issuer],
                    'xmlns:saml' => "urn:oasis:names:tc:SAML:2.0:assertion",
                    'xmlns:samlp' => 'urn:oasis:names:tc:SAML:2.0:protocol') do
