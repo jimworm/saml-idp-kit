@@ -51,7 +51,7 @@ module SamlIdpKit
         Nokogiri::XML::Builder.with(keyinfo) do
           KeyInfo('xmlns' => 'http://www.w3.org/2000/09/xmldsig#') do
             X509Data do
-              X509Certificate certificate.gsub(/\s+/, '')
+              X509Certificate certificate
             end
           end
         end
