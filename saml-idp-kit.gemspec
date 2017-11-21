@@ -1,4 +1,4 @@
-require_relative 'lib/saml-idp-kit'
+require_relative 'lib/saml-idp-kit/version'
 
 Gem::Specification.new do |s|
   s.name          = 'saml-idp-kit'
