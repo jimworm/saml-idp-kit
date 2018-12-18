@@ -97,7 +97,9 @@ module SamlIdpKit
       Base64.encode64(saml_response.to_xml(save_with: Nokogiri::XML::Node::SaveOptions::AS_XML))
     end
     
-    def form_html(target:, response:)
+    def form_html(target:, response:, relaystate: nil)
+      relaystate = "<input type=\"hidden\" name=\"RelayState\" value=\"#{relaystate}\" />" if relaystate
+      
       <<-EOS
       <!DOCTYPE html>
       <html>
@@ -108,6 +110,7 @@ module SamlIdpKit
       <body onload="document.forms[0].submit();" style="visibility:hidden;">
       <form method="post" action="#{target}">
       <input type="hidden" name="SAMLResponse" id="SAMLResponse" value="#{response}" />
+      #{relaystate}
       <input type="submit" value="Submit" />
       </form>
       </body>

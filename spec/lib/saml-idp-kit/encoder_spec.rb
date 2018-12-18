@@ -15,4 +15,20 @@ describe "SamlIdpKit::Encoder", type: :lib do
       expect(response.in_response_to).to eq('abc.net')
     end
   end
+  
+  describe "#form_html" do
+    let(:target)     { 'zippity' }
+    let(:response)   { 'doodah' }
+    let(:relaystate) { 'boobity' }
+    
+    it "includes the target, response, and relaystate" do
+      html = encoder.form_html(target: 'zippity', response: 'doodah', relaystate: 'boobity')
+      expect(html).to include(target, response, relaystate)
+    end
+    
+    it "does not require relaystate" do
+      html = encoder.form_html(target: 'zippity', response: 'doodah')
+      expect(html).not_to include('RelayState')
+    end
+  end
 end
