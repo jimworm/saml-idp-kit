@@ -6,7 +6,8 @@ module SamlIdpKit
       decoded_request.remove_namespaces!
       zstream.finish
       zstream.close
-      { acs_url: decoded_request.css('AuthnRequest').attribute('AssertionConsumerServiceURL').value,
+      { request_id: decoded_request.css('AuthnRequest').attribute('ID').value,
+        acs_url: decoded_request.css('AuthnRequest').attribute('AssertionConsumerServiceURL').value,
         issuer: decoded_request.css('Issuer').text }
     end
   end

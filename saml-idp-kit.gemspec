@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name          = 'saml-idp-kit'
-  s.version       = '0.0.9'
+  s.version       = '0.0.10'
   s.authors       = "Jimworm"
   s.email         = 'jimworm@gmail.com'
   s.homepage      = 'https://github.com/jimworm/saml-idp-kit'
   s.summary       = 'SAML IdP tools'
   s.description   = 'SAML tools to decode requests and encode assertions, for use as an identity provider'
-  s.date          = '2018-12-18'
+  s.date          = '2018-12-22'
   s.files         = Dir.glob("lib/**/*") + ["MIT-LICENSE",
                                             "README.md",
                                             "Gemfile",

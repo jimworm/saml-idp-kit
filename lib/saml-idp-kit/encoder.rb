@@ -16,7 +16,14 @@ module SamlIdpKit
       response_id, reference_id = UUID.generate, UUID.generate
       audience_uri = opts[:audience_uri] || decoded_saml_request[:acs_url]
       
-      assertion = assert(idp: idp_name, requester: decoded_saml_request[:issuer] , audience_uri: audience_uri, nameid: nameid, at: now, reference_id: reference_id, attributes: opts[:attributes])
+      assertion = assert(idp: idp_name,
+                         requester: decoded_saml_request[:issuer],
+                         audience_uri: audience_uri,
+                         nameid: nameid,
+                         at: now,
+                         in_response_to: decoded_saml_request[:request_id],
+                         reference_id: reference_id,
+                         attributes: opts[:attributes])
       
       signed_info = Nokogiri::XML::DocumentFragment.parse('').tap do |signed_info|
         digest_value   = Base64.strict_encode64(algorithm.digest(canonicalize(assertion)))
@@ -77,7 +84,7 @@ module SamlIdpKit
         Nokogiri::XML::Builder.with(saml_response) do
           Response('ID' => "_#{response_id}", 'Version' => '2.0', 'IssueInstant' => now.iso8601,
                    'Destination' => audience_uri, 'Consent' => 'urn:oasis:names:tc:SAML:2.0:consent:unspecified',
-                   'InResponseTo' => decoded_saml_request[:issuer],
+                   'InResponseTo' => decoded_saml_request[:request_id],
                    'xmlns:saml' => "urn:oasis:names:tc:SAML:2.0:assertion",
                    'xmlns:samlp' => 'urn:oasis:names:tc:SAML:2.0:protocol') do
             Issuer(idp_name, 'xmlns' => 'urn:oasis:names:tc:SAML:2.0:assertion')
@@ -120,7 +127,7 @@ module SamlIdpKit
     
     
     private
-    def assert(idp: 'https://example.com', requester: , audience_uri:, nameid:, at:, reference_id:, attributes: {})
+    def assert(idp: 'https://example.com', requester: , audience_uri:, nameid:, at:, in_response_to:, reference_id:, attributes: {})
       Nokogiri::XML::DocumentFragment.parse('').tap do |assertion|
         Nokogiri::XML::Builder.with(assertion) do
           Assertion('xmlns' => 'urn:oasis:names:tc:SAML:2.0:assertion', 'ID' => "_#{reference_id}", 'IssueInstant' => at.iso8601, 'Version' => '2.0') do
@@ -128,7 +135,7 @@ module SamlIdpKit
             Subject do
               NameID nameid, 'Format' => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
               SubjectConfirmation('Method' => "urn:oasis:names:tc:SAML:2.0:cm:bearer") do
-                SubjectConfirmationData('InResponseTo' => requester, 'NotOnOrAfter' => (at+3*60).iso8601, 'Recipient' => audience_uri)
+                SubjectConfirmationData('InResponseTo' => in_response_to, 'NotOnOrAfter' => (at+3*60).iso8601, 'Recipient' => audience_uri)
               end
             end
             Conditions('NotBefore' => (at-5).iso8601, 'NotOnOrAfter' => (at+60*60).iso8601) do
