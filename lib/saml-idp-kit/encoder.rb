@@ -14,11 +14,13 @@ module SamlIdpKit
     def encode(nameid, decoded_saml_request, opts = {})
       now = Time.now.utc
       response_id, reference_id = UUID.generate, UUID.generate
-      audience_uri = opts[:audience_uri] || decoded_saml_request[:acs_url]
+      acs_url = opts[:acs_url] || decoded_saml_request[:acs_url]
+      audience = opts[:audience] || URI(acs_url).host
       
       assertion = assert(idp: idp_name,
                          requester: decoded_saml_request[:issuer],
-                         audience_uri: audience_uri,
+                         audience: audience,
+                         acs_url: acs_url,
                          nameid: nameid,
                          at: now,
                          in_response_to: decoded_saml_request[:request_id],
@@ -83,7 +85,7 @@ module SamlIdpKit
       saml_response = Nokogiri::XML::DocumentFragment.parse('').tap do |saml_response|
         Nokogiri::XML::Builder.with(saml_response) do
           Response('ID' => "_#{response_id}", 'Version' => '2.0', 'IssueInstant' => now.iso8601,
-                   'Destination' => audience_uri, 'Consent' => 'urn:oasis:names:tc:SAML:2.0:consent:unspecified',
+                   'Destination' => acs_url, 'Consent' => 'urn:oasis:names:tc:SAML:2.0:consent:unspecified',
                    'InResponseTo' => decoded_saml_request[:request_id],
                    'xmlns:saml' => "urn:oasis:names:tc:SAML:2.0:assertion",
                    'xmlns:samlp' => 'urn:oasis:names:tc:SAML:2.0:protocol') do
@@ -127,7 +129,7 @@ module SamlIdpKit
     
     
     private
-    def assert(idp: 'https://example.com', requester: , audience_uri:, nameid:, at:, in_response_to:, reference_id:, attributes: {})
+    def assert(idp: 'https://example.com', requester: , audience:, acs_url:, nameid:, at:, in_response_to:, reference_id:, attributes: {})
       Nokogiri::XML::DocumentFragment.parse('').tap do |assertion|
         Nokogiri::XML::Builder.with(assertion) do
           Assertion('xmlns' => 'urn:oasis:names:tc:SAML:2.0:assertion', 'ID' => "_#{reference_id}", 'IssueInstant' => at.iso8601, 'Version' => '2.0') do
@@ -135,12 +137,12 @@ module SamlIdpKit
             Subject do
               NameID nameid, 'Format' => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
               SubjectConfirmation('Method' => "urn:oasis:names:tc:SAML:2.0:cm:bearer") do
-                SubjectConfirmationData('InResponseTo' => in_response_to, 'NotOnOrAfter' => (at+3*60).iso8601, 'Recipient' => audience_uri)
+                SubjectConfirmationData('InResponseTo' => in_response_to, 'NotOnOrAfter' => (at+3*60).iso8601, 'Recipient' => acs_url)
               end
             end
             Conditions('NotBefore' => (at-5).iso8601, 'NotOnOrAfter' => (at+60*60).iso8601) do
               AudienceRestriction do
-                Audience audience_uri
+                Audience audience
               end
             end
             AttributeStatement do
